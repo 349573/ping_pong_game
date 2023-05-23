@@ -24,6 +24,17 @@ def player_motion(obj, s):
         obj.bottom = H
 
 
+def opponent_motion(obj, p_obj, s):
+    if obj.top < p_obj.y:  # если мяч выше верхней границы ракетки оппонента
+        obj.y += s  # ракетка поднимается за мячом
+    elif obj.bottom > p_obj.y:
+        obj.y -= s
+
+    if obj.top <= 0:
+        obj.top = 0
+    elif obj.bottom >= H:
+        obj.bottom = H
+
 W = 1280
 H = 720
 FPS = 60
@@ -42,7 +53,7 @@ ball = pg.Rect(W // 2 - 15, H // 2 - 15, 30, 30)
 
 speed = 7
 p_speed = 0
-o_speed = 0
+o_speed = speed
 ball_moving = False
 speed_x = speed_y = speed
 
@@ -75,3 +86,4 @@ while True:  # цикл игры
 
     ball_move(ball)
     player_motion(player, p_speed)
+    opponent_motion(opponent, ball, o_speed)
