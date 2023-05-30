@@ -1,16 +1,46 @@
 import sys
 import pygame as pg
+from random import choice
 
+
+def ball_start(obj):
+    global speed_x, speed_y, ball_moving, score_time
+    obj.center = (W // 2, H // 2)
+    speed_x *= choice([-1, 1])
+    speed_y *= choice ([-1, 1])
+
+    cur_time = pg.time.get_ticks()
+
+    if cur_time - score_time < 700:
+        num_3 = score_font.render('3', True, VIOLET)
+        screen.blit(num_3, [W // 2, H // 2])
+    elif cur_time - score_time < 1400:
+        num_3 = score_font.render('2', True, VIOLET)
+        screen.blit(num_3, [W // 2, H // 2])
+    elif cur_time - score_time < 2100:
+        num_3 = score_font.render('1', True, VIOLET)
+        screen.blit(num_3, [W // 2, H // 2])
+
+    if cur_time - score_time < 2100:
+        speed_x, speed_y = 0, 0
+    else:
+        speed_x = speed * choice ([-1, 1])
+        speed_y = speed * choice ([-1, 1])
+        score_time = None
 
 def ball_move(obj):
-    global speed_x, speed_y
+    global speed_x, speed_y, player_score, opponent_score, score_time
     obj.x += speed_x
     obj.y += speed_y
 
     if obj.top <= 0 or obj.bottom >= H:
         speed_y *= -1
-    elif obj.left <= 0 or obj.right >= W:
-        speed_x *= -1
+    elif obj.left <= 0:
+        score_time = pg.time.get_ticks()
+        player_score += -1
+    elif obj.right >= W:
+        score_time = pg.time.get_ticks()
+        opponent_score += 1
     elif obj.colliderect(player) or obj.colliderect(opponent):
         speed_x *= -1
 
@@ -55,8 +85,15 @@ speed = 7
 p_speed = 0
 o_speed = speed
 ball_moving = False
-speed_x = speed_y = speed
+score_time = True
+speed_x = speed * choice([-1, 1])
+speed_y = speed * choice([-1, 1])
 
+
+
+player_score, opponent_score =0, 0
+pg.font.init()
+score_font = pg.font.SysFont('comicsans', 64)
 
 pg.init()  # инициализируем pygame
 screen = pg.display.set_mode((W, H))  # создаем экран игры разрешением 1280х720px
@@ -74,7 +111,20 @@ while True:  # цикл игры
     pg.draw.rect(screen, VIOLET, opponent)
     pg.draw.aaline(screen, WHITE, [W // 2, 0], [W // 2, H])
     pg.draw.ellipse(screen, VIOLET, ball)
+    player_score_text = score_font.render(str(player_score), True, VIOLET)
+    screen.blit(player_score_text, [W // 2 + 50, H * 0.25])
+
+
+    opponent_score_text = score_font.render(str(opponent_score), True, VIOLET)
+    screen.blit (opponent_score_text, [W // 2 - 100, H * 0.25])
     pg.display.update()
+
+    if score_time:
+        ball_start(ball)
+
+
+    pg.display.update()
+
 
     keys = pg.key.get_pressed()
     if keys[pg.K_UP]:
@@ -83,6 +133,7 @@ while True:  # цикл игры
         p_speed += speed
     else:
         p_speed = 0
+
 
     ball_move(ball)
     player_motion(player, p_speed)
